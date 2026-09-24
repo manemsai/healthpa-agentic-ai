@@ -1,0 +1,36 @@
+[
+  {
+    "chunk_id": "ADMIN.00001-0000",
+    "policy_id": "ADMIN.00001",
+    "title": "Medical Policy Formation",
+    "text": "Medical Policy Formation describes how Anthem develops medical policies and clinical UM guidelines for coverage decisions. The page explains that policy is informational, does not constitute plan authorization, and coverage depends on the member's benefit plan and applicable law.",
+    "payer": "Anthem",
+    "section_path": null,
+    "source_url": "https://www.anthem.com/medpolicies/abcbs/active/mp_pw_a044135.html",
+    "market": "IN",
+    "line_of_business": "COMMERCIAL",
+    "source_type": "medical_policy",
+    "effective_date": "2026-01-06",
+    "summary": "Medical Policy Formation describes how Anthem develops medical policies and clinical UM guidelines for coverage decisions. The page explains that policy is informational, does not constitute plan authorization, and coverage depends on the member's benefit plan and applicable law.",
+    "tags": [
+      "medical_necessity"
+    ]
+  },
+  {
+    "chunk_id": "ADMIN.00004-0000",
+    "policy_id": "ADMIN.00004",
+    "title": "Medical Necessity Criteria",
+    "text": "Medical Necessity Criteria explains that the published criteria support development and updating of medical policies and clinical UM guidelines, but the covered individual's benefit plan definition controls the final benefit determination.",
+    "payer": "Anthem",
+    "section_path": null,
+    "source_url": "https://www.anthem.com/medpolicies/abc/active/mp_pw_a044145.html",
+    "market": "IN",
+    "line_of_business": "COMMERCIAL",
+    "source_type": "medical_policy",
+    "effective_date": "2026-07-01",
+    "summary": "Medical Necessity Criteria explains that the published criteria support development and updating of medical policies and clinical UM guidelines, but the covered individual's benefit plan definition controls the final benefit determination.",
+    "tags": [
+      "medical_necessity"
+    ]
+  }
+]

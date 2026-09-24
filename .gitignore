@@ -1,0 +1,47 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# AWS credentials - defensive protection
+.aws/
+credentials
+.aws/credentials
+
+# Python
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Raw / processed healthcare data
+data/raw/
+data/processed/
+
+# Vector databases / generated indexes
+data/vectorstore/
+*.index
+*.faiss
+*.pkl
+
+# Logs
+*.log
+logs/
+
+# Build
+build/
+dist/
+*.egg-info/

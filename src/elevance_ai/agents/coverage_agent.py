@@ -1,0 +1,1 @@
+"""Coverage-focused agent implementation."""
