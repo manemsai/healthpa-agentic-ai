@@ -2,39 +2,92 @@
 
 ## Status
 
-This repository is an active proof of concept. It currently contains a primary policy-search implementation and an experimental agentic CMS RAG workflow. They should not yet be treated as one production architecture.
+HealthPA is an **end-to-end local/demo MVP** for evidence-first healthcare policy assistance. The primary runtime is implemented under `src/elevance_ai/` and is exercised through FastAPI, the CLI, tests, and a policy MCP server. It deliberately stops short of making member-specific approval, denial, benefit, or price determinations.
 
-## Primary Policy Search Flow
+A separate legacy/experimental CMS RAG + AWS Bedrock implementation remains under `src/graph/`, `src/rag/`, and `src/llm/` for research. It is not required by the primary MVP.
 
-1. **Ingestion** — public Anthem policy/catalog pages are collected and normalized into structured policy documents.
-2. **Chunking and indexing** — normalized documents are chunked, embedded locally, and stored in a FAISS index.
-3. **Retrieval** — `PolicySearchTool` searches the local index and can filter evidence by market and line of business.
-4. **API** — FastAPI exposes health and policy-query endpoints.
-5. **Decision boundary** — retrieved public evidence is returned with explicit warnings that member-specific coverage and prior authorization require plan or authorized verification.
+## Primary Runtime
 
-## Experimental Agentic RAG Flow
+```text
+Public policy sources
+        |
+        v
+Ingestion + normalization
+        |
+        v
+Chunking + local embeddings
+        |
+        v
+FAISS policy index
+        |
+        v
+PolicySearchTool <---- Policy MCP server
+        |
+        v
+HealthPAGraph
+  |       |        |
+policy  coverage  provider-cost
+  |       |        |
+  +-------+--------+
+          |
+          v
+      Reviewer
+          |
+          +---- unsafe/member-specific/unsupported ---> Human/authorized verification
+          |
+          v
+Structured AssistantDecision + Evidence
+          |
+     +----+----+
+     |         |
+ FastAPI     CLI
+```
 
-The prototype under `src/graph/` uses LangGraph nodes for:
+## Components
 
-- intent routing
-- retrieval
-- evidence-sufficiency checks
-- answer generation
-- grounding checks
-- review decisions
-- human-review escalation
-- final response handling
+### Ingestion and retrieval
+Public policy/catalog content is normalized, chunked, embedded, and stored in FAISS. `PolicySearchTool` retrieves evidence with market and line-of-business filters.
 
-The associated experimental RAG implementation uses a local FAISS store and an AWS Bedrock client configured for Amazon Nova Lite.
+### Agent routing
+The primary `HealthPAGraph` routes questions into policy, member-coverage, provider-cost, or review behavior. The local MVP intentionally uses deterministic routing so its safety behavior is testable and does not depend on an LLM to decide whether sensitive member-specific questions should be escalated.
 
-## Safety Design
+### Policy agent
+The policy agent returns structured public-policy evidence. Evidence is guidance, not a final benefit or authorization determination.
 
-The prototype is intentionally conservative. Low retrieval confidence, low grounding scores, payer-specific authorization questions, or insufficient evidence can route to human review instead of producing a definitive coverage determination.
+### Coverage and cost boundaries
+Member-specific benefit/claim questions and unsupported negotiated-rate questions are escalated. The system does not fabricate eligibility, coverage, prices, or authorization outcomes when the required source system is unavailable.
 
-## Known Architecture Work
+### Reviewer
+The reviewer detects final-decision language such as approval/denial claims and downgrades the response to human review with plan verification guidance.
 
-- Consolidate duplicate/legacy package paths.
-- Connect the primary policy-search package to the agentic orchestration path.
-- Complete evaluation and integration suites.
-- Implement deployment packaging and infrastructure only after the runtime target is selected.
-- Add production authentication, authorization, audit logging, observability, and secret-management patterns.
+### MCP
+`src/elevance_ai/mcp_servers/policy_server.py` exposes grounded policy search as an MCP tool over stdio. The API/CLI and MCP server share the same core retrieval implementation instead of duplicating business logic.
+
+### API
+FastAPI provides:
+- `GET /health` for service/configuration health
+- `GET /metrics` for non-sensitive process-local aggregate counters
+- `POST /query` for the reviewed HealthPA decision flow
+
+### Observability
+The local MVP records aggregate query count, selected route, and decision status. It intentionally does not record question text or member data in this metric layer.
+
+### Testing and CI
+Unit tests cover retrieval, routing/review, API contracts, safety behavior, and observability. Integration/evaluation tests provide smoke and safety checks. GitHub Actions installs the package, runs pytest, and enforces Ruff linting.
+
+### Containerization
+The Dockerfile packages the FastAPI runtime with Python 3.12 and Uvicorn. This demonstrates a deployable container artifact; it does not claim that a production cloud environment is currently running.
+
+## Safety Boundary
+
+HealthPA is not a medical device or autonomous utilization-management system. Public policy evidence cannot establish a member's active benefits, eligibility, claims state, contractual provider rate, or final authorization outcome. Those questions require authorized source systems and/or human review.
+
+The architecture therefore favors abstention/escalation over unsupported certainty.
+
+## Optional Experimental Track
+
+The legacy CMS/LangGraph/RAG code demonstrates richer LLM-oriented experimentation, including AWS Bedrock/Amazon Nova Lite. It is retained for learning and future integration but is intentionally separated from the tested primary MVP until its external dependencies and operational boundary are defined.
+
+## Production Extensions Not Claimed
+
+A production deployment would still require authenticated payer/member integrations, normalized pricing data, IAM and authorization, PHI/security controls, secret management, durable audit logs, production telemetry/tracing, SLOs, resilience controls, and infrastructure configured for a specific cloud runtime. Terraform and additional CMS/pricing/voice adapters should be completed only against real deployment requirements rather than mocked as production integrations.
