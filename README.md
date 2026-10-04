@@ -4,7 +4,7 @@ Healthcare policy retrieval and agentic AI proof of concept for **grounded cover
 
 The repository explores how policy documents can be ingested, indexed, retrieved, and presented as evidence to an AI workflow while keeping final member-specific coverage or authorization decisions outside the model.
 
-> **Project status:** Active proof of concept. Policy ingestion, local FAISS retrieval, API contracts, and unit tests are implemented. Agentic orchestration, evaluation, infrastructure, and deployment areas are still experimental or scaffolded.
+> **Project status:** End-to-end local/demo MVP implemented. Policy ingestion, FAISS retrieval, deterministic agent routing/review, FastAPI, policy MCP exposure, Docker packaging, aggregate observability, safety evaluation, integration tests, and CI are implemented. AWS Bedrock/CMS experiments remain available as optional research paths; production payer/member integrations and cloud infrastructure are intentionally out of scope until real authorized services and a deployment target are selected.
 
 ## What This Project Demonstrates
 
@@ -13,14 +13,16 @@ The repository explores how policy documents can be ingested, indexed, retrieved
 - Local vector indexing and retrieval with FAISS
 - Evidence-oriented policy search through a FastAPI service
 - Retrieval filters for payer market and line of business
-- Experimental LangGraph workflow for routing, retrieval, grounding, confidence checks, and human-review escalation
+- Agentic orchestration for policy, member-coverage, provider-cost, reviewer, and human-escalation paths
 - Experimental AWS Bedrock generation using Amazon Nova Lite
-- Unit tests for ingestion, policy retrieval, RAG behavior, and API response contracts
+- Unit, integration, and safety-evaluation tests plus GitHub Actions CI
+- MCP exposure for policy retrieval so external agent clients can call the grounded search capability
+- Privacy-safe process-local metrics for aggregate route and decision-status monitoring
 - Safety-oriented responses that avoid treating public policy evidence as a final member-specific coverage decision
 
 ## Architecture
 
-The repository currently contains two related implementation tracks.
+The repository has one primary local/demo architecture under `src/elevance_ai/` plus a retained legacy/experimental CMS RAG track.
 
 ### 1. Policy Search API — primary implementation
 
@@ -51,7 +53,7 @@ Evidence + verification guidance
 
 The primary package lives under `src/elevance_ai/`, with the API entrypoint in `apps/api/main.py`.
 
-### 2. Agentic CMS RAG prototype — experimental
+### 2. Legacy/experimental CMS RAG + Bedrock track
 
 ```text
 User question
@@ -104,9 +106,9 @@ src/rag/                   Experimental CMS RAG components
 src/llm/                   Experimental Bedrock client
 scripts/                    Ingestion, indexing, and evaluation entrypoints
 tests/unit/                 Unit tests
-tests/integration/          Integration-test scaffold
-tests/evaluation/           Evaluation scaffold
-docker/                     Deployment scaffold
+tests/integration/          API integration tests
+tests/evaluation/           Safety evaluation tests
+docker/                     Container packaging
 infra/terraform/            Infrastructure scaffold
 data/                       Local/generated data locations
 ```
@@ -168,7 +170,8 @@ uvicorn apps.api.main:app --reload
 Available endpoints include:
 
 - `GET /health` — service/configuration health information
-- `POST /query` — retrieve policy evidence for a question
+- `GET /metrics` — non-sensitive aggregate route/status counters
+- `POST /query` — route a policy, coverage, or cost question through the HealthPA agent flow
 
 Example request:
 
@@ -185,13 +188,14 @@ The API returns retrieved evidence plus guidance that plan/member-specific verif
 
 ## Testing
 
-Run the unit tests with:
+Run the CI test scope locally with:
 
 ```bash
-pytest tests/unit
+PYTHONPATH=. pytest tests/unit tests/evaluation
+ruff check src apps scripts tests
 ```
 
-The current test suite includes coverage for policy ingestion, retrieval tooling, RAG behavior, and API response contracts.
+The suite covers ingestion, retrieval, agent routing/review, API contracts, safety behavior, and observability. GitHub Actions runs the same test/lint quality gate on pushes and pull requests.
 
 ## Safety and Scope
 
@@ -201,22 +205,22 @@ The implemented workflows intentionally distinguish public policy evidence from 
 
 ## Current Limitations
 
-- Docker configuration is currently scaffolded rather than deployment-ready.
-- Terraform infrastructure is currently scaffolded.
-- Evaluation tooling is not yet complete.
-- Integration/evaluation test suites require further implementation.
-- The experimental CMS RAG/LangGraph code and the newer policy-search package have not yet been consolidated into one architecture.
-- Production authentication, authorization, audit controls, observability, and deployment hardening are outside the current proof-of-concept scope.
+- This is a local/demo MVP, not a production healthcare authorization system.
+- Member eligibility, claims, benefits, provider contracts, and negotiated-rate systems are not connected to real authorized payer services.
+- Provider-cost routing therefore escalates rather than inventing a price.
+- CMS/Bedrock code under the legacy experimental track is not required by the primary local flow.
+- Terraform remains a deployment-target placeholder; no cloud environment is claimed as deployed.
+- Metrics are process-local aggregate counters, not a production telemetry backend.
+- Production identity/access management, audit retention, PHI controls, secret management, distributed tracing, SLOs, and operational hardening remain deployment work.
 
 ## Roadmap
 
-- Consolidate the policy API and agentic workflow into one package structure
-- Expand automated evaluation and integration testing
-- Add measurable retrieval and grounding evaluation
-- Add Docker packaging and deployment configuration
-- Add infrastructure-as-code when the deployment target is finalized
-- Add observability and audit-friendly tracing
-- Document an end-to-end demo with sample, non-sensitive data
+- Add larger retrieval/grounding evaluation datasets using synthetic or public non-PHI fixtures
+- Add authenticated payer/member adapters only when authorized services are available
+- Add normalized machine-readable pricing ingestion for provider-cost questions
+- Add production telemetry/tracing and audit controls for a selected deployment environment
+- Finalize Terraform only after choosing the actual AWS runtime and security boundary
+- Add a recorded/demo walkthrough using non-sensitive sample data
 
 ## Author
 
