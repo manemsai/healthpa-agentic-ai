@@ -8,39 +8,35 @@ A separate legacy/experimental CMS RAG + AWS Bedrock implementation remains unde
 
 ## Primary Runtime
 
-```text
-Public policy sources
-        |
-        v
-Ingestion + normalization
-        |
-        v
-Chunking + local embeddings
-        |
-        v
-FAISS policy index
-        |
-        v
-PolicySearchTool <---- Policy MCP server
-        |
-        v
-HealthPAGraph
-  |       |        |
-policy  coverage  provider-cost
-  |       |        |
-  +-------+--------+
-          |
-          v
-      Reviewer
-          |
-          +---- unsafe/member-specific/unsupported ---> Human/authorized verification
-          |
-          v
-Structured AssistantDecision + Evidence
-          |
-     +----+----+
-     |         |
- FastAPI     CLI
+```mermaid
+flowchart TD
+    A[Public Policy Sources] --> B[Ingestion & Normalization]
+    B --> C[Chunking & Local Embeddings]
+    C --> D[(FAISS Policy Index)]
+    D --> E[PolicySearchTool]
+
+    M[Policy MCP Server] --> E
+    E --> G[HealthPAGraph]
+
+    G --> P[Policy Agent]
+    G --> COV[Coverage Agent]
+    G --> COST[Provider Cost Agent]
+    G --> REV[Review Route]
+
+    P --> R[Safety Reviewer]
+    COV --> R
+    COST --> R
+    REV --> R
+
+    R -->|Grounded / supported| DEC[Structured AssistantDecision + Evidence]
+    R -->|Member-specific, unsafe, or unsupported| H[Human / Authorized Plan Verification]
+
+    DEC --> API[FastAPI]
+    DEC --> CLI[CLI]
+
+    API --> HEALTH[GET /health]
+    API --> QUERY[POST /query]
+    API --> METRICS[GET /metrics]
 ```
 
 ## Components
