@@ -1,7 +1,7 @@
 """LangGraph orchestration for the local HealthPA agent demo."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from langgraph.graph import END, START, StateGraph
@@ -23,9 +23,10 @@ class HealthPAGraph:
 
     policy_tool: PolicySearchTool
     pricing_path: str | Path | None = None
+    _compiled: object = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "_compiled", self._build().compile())
+        self._compiled = self._build().compile()
 
     def _build(self) -> StateGraph:
         graph = StateGraph(AgentState)
