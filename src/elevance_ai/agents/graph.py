@@ -11,6 +11,7 @@ from elevance_ai.agents.reviewer import review_decision
 from elevance_ai.agents.router import route_question
 from elevance_ai.domain.evidence import AssistantDecision
 from elevance_ai.tools.policy_tools import PolicySearchTool
+from elevance_ai.observability.metrics import record_query
 
 
 @dataclass(slots=True)
@@ -43,7 +44,9 @@ class HealthPAGraph:
             decision = build_coverage_response(question)
         else:
             decision = build_coverage_response(question)
-        return review_decision(decision)
+        reviewed = review_decision(decision)
+        record_query(route, reviewed.status)
+        return reviewed
 
 
 def build_graph(policy_tool: PolicySearchTool) -> HealthPAGraph:
