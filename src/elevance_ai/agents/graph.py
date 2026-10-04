@@ -10,8 +10,8 @@ from elevance_ai.agents.provider_cost_agent import build_provider_cost_response
 from elevance_ai.agents.reviewer import review_decision
 from elevance_ai.agents.router import route_question
 from elevance_ai.domain.evidence import AssistantDecision
-from elevance_ai.tools.policy_tools import PolicySearchTool
 from elevance_ai.observability.metrics import record_query
+from elevance_ai.tools.policy_tools import PolicySearchTool
 
 
 @dataclass(slots=True)
