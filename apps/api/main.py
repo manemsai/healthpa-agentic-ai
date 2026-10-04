@@ -98,7 +98,7 @@ def query_policy(request: PolicyQueryRequest) -> PolicyQueryResponse:
 
     market = request.market or settings.payer_market
     line_of_business = request.line_of_business or settings.line_of_business
-    decision = build_graph(tool).invoke(
+    decision = build_graph(tool, pricing_path=settings.pricing_data_path).invoke(
         request.question,
         market=market,
         line_of_business=line_of_business,
