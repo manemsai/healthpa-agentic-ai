@@ -17,4 +17,6 @@ jobs:
       - run: pip install -e .
       - run: pip install pytest pytest-asyncio ruff mypy
       - run: pytest tests/unit tests/evaluation
+        env:
+          PYTHONPATH: .
       - run: ruff check src apps scripts tests
