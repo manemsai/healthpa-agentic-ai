@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
@@ -41,8 +43,27 @@ class PolicyQueryResponse(BaseModel):
 
 configure_logging()
 settings = get_settings()
-app = FastAPI(title=settings.app_name, version="0.1.0", description="Evidence-first healthcare policy retrieval API")
 policy_tool: PolicySearchTool | None = None
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """Load local retrieval resources for the application lifecycle."""
+
+    global policy_tool
+    try:
+        policy_tool = PolicySearchTool.from_settings(settings)
+    except (OSError, RuntimeError, ValueError, ImportError):
+        policy_tool = None
+    yield
+
+
+app = FastAPI(
+    title=settings.app_name,
+    version="0.1.0",
+    description="Evidence-first healthcare policy retrieval API",
+    lifespan=lifespan,
+)
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -56,17 +77,6 @@ def health() -> HealthResponse:
         market=settings.payer_market,
         line_of_business=settings.line_of_business,
     )
-
-
-@app.on_event("startup")
-def _load_policy_tool() -> None:
-    """Load the local policy tool when the API starts."""
-
-    global policy_tool
-    try:
-        policy_tool = PolicySearchTool.from_settings(settings)
-    except (OSError, RuntimeError, ValueError, ImportError):
-        policy_tool = None
 
 
 @app.get("/metrics")

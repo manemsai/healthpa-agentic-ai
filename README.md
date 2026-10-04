@@ -4,7 +4,7 @@ Healthcare policy retrieval and agentic AI proof of concept for **grounded cover
 
 The repository explores how policy documents can be ingested, indexed, retrieved, and presented as evidence to an AI workflow while keeping final member-specific coverage or authorization decisions outside the model.
 
-> **Project status:** End-to-end local/demo MVP implemented. Policy ingestion, FAISS retrieval, deterministic agent routing/review, FastAPI, policy MCP exposure, Docker packaging, aggregate observability, safety evaluation, integration tests, and CI are implemented. AWS Bedrock/CMS experiments remain available as optional research paths; production payer/member integrations and cloud infrastructure are intentionally out of scope until real authorized services and a deployment target are selected.
+> **Project status:** End-to-end local/demo MVP implemented. Policy ingestion, FAISS retrieval, LangGraph orchestration with deterministic safety routing/review, FastAPI, policy MCP exposure, Docker packaging, aggregate observability, safety evaluation, integration tests, and CI are implemented. AWS Bedrock/CMS experiments remain available as optional research paths; production payer/member integrations and cloud infrastructure are intentionally out of scope until real authorized services and a deployment target are selected.
 
 ## What This Project Demonstrates
 
@@ -16,7 +16,7 @@ The repository explores how policy documents can be ingested, indexed, retrieved
 - Agentic orchestration for policy, member-coverage, provider-cost, reviewer, and human-escalation paths
 - Experimental AWS Bedrock generation using Amazon Nova Lite
 - Unit, integration, and safety-evaluation tests plus GitHub Actions CI
-- MCP exposure for policy retrieval so external agent clients can call the grounded search capability
+- MCP tools for policy retrieval, normalized public pricing lookup, and CMS public-source scope guidance
 - Privacy-safe process-local metrics for aggregate route and decision-status monitoring
 - Safety-oriented responses that avoid treating public policy evidence as a final member-specific coverage decision
 
@@ -24,32 +24,26 @@ The repository explores how policy documents can be ingested, indexed, retrieved
 
 The repository has one primary local/demo architecture under `src/elevance_ai/` plus a retained legacy/experimental CMS RAG track.
 
-### 1. Policy Search API — primary implementation
+### 1. Primary HealthPA runtime
 
-```text
-Public policy pages
-      |
-      v
-Policy ingestion
-      |
-      v
-Normalized JSONL
-      |
-      v
-Chunking + local embeddings
-      |
-      v
-FAISS policy index
-      |
-      v
-PolicySearchTool
-      |
-      v
-FastAPI /query endpoint
-      |
-      v
-Evidence + verification guidance
-```
+\`\`\`mermaid
+flowchart TD
+    A[Public policy sources] --> B[Ingestion and normalization]
+    B --> C[Chunking and local embeddings]
+    C --> D[(FAISS policy index)]
+    D --> E[PolicySearchTool]
+    E --> G[LangGraph HealthPAGraph]
+    P[Normalized public pricing data] --> G
+    G --> PA[Policy agent]
+    G --> CA[Coverage agent]
+    G --> PCA[Provider cost agent]
+    PA --> R[Safety reviewer]
+    CA --> R
+    PCA --> R
+    R --> O[Structured decision and evidence]
+    R --> H[Human or authorized verification]
+    O --> API[FastAPI / CLI / MCP]
+\`\`\`
 
 The primary package lives under `src/elevance_ai/`, with the API entrypoint in `apps/api/main.py`.
 
@@ -191,7 +185,7 @@ The API returns retrieved evidence plus guidance that plan/member-specific verif
 Run the CI test scope locally with:
 
 ```bash
-PYTHONPATH=. pytest tests/unit tests/evaluation
+PYTHONPATH=. pytest tests/unit tests/integration tests/evaluation
 ruff check src apps scripts tests
 ```
 
@@ -207,17 +201,37 @@ The implemented workflows intentionally distinguish public policy evidence from 
 
 - This is a local/demo MVP, not a production healthcare authorization system.
 - Member eligibility, claims, benefits, provider contracts, and negotiated-rate systems are not connected to real authorized payer services.
-- Provider-cost routing therefore escalates rather than inventing a price.
+- Provider-cost routing can return normalized public negotiated-rate observations when a billing code and local pricing dataset are available; otherwise it safely escalates rather than inventing a price.
 - CMS/Bedrock code under the legacy experimental track is not required by the primary local flow.
 - Terraform remains a deployment-target placeholder; no cloud environment is claimed as deployed.
 - Metrics are process-local aggregate counters, not a production telemetry backend.
 - Production identity/access management, audit retention, PHI controls, secret management, distributed tracing, SLOs, and operational hardening remain deployment work.
 
+## Pricing Demo
+
+Normalize a local CMS transparency-style JSON or JSON.GZ file into the compact CSV used by HealthPA:
+
+\`\`\`bash
+python scripts/normalize_pricing.py input.json.gz data/silver/pricing.csv
+python scripts/extract_rates.py data/silver/pricing.csv --billing-code 99213
+\`\`\`
+
+The repository includes only synthetic/non-PHI pricing fixtures. Public negotiated rates are reference evidence and are not member-specific out-of-pocket estimates.
+
+## Evaluation
+
+Run the deterministic routing and safety evaluation:
+
+\`\`\`bash
+PYTHONPATH=. python scripts/evaluate.py
+\`\`\`
+
+The current evaluation gate checks routing accuracy across policy, coverage, provider-cost, and review cases plus safe abstention when policy evidence is unavailable. These are deterministic engineering checks, not claims of clinical or production model accuracy.
+
 ## Roadmap
 
 - Add larger retrieval/grounding evaluation datasets using synthetic or public non-PHI fixtures
 - Add authenticated payer/member adapters only when authorized services are available
-- Add normalized machine-readable pricing ingestion for provider-cost questions
 - Add production telemetry/tracing and audit controls for a selected deployment environment
 - Finalize Terraform only after choosing the actual AWS runtime and security boundary
 - Add a recorded/demo walkthrough using non-sensitive sample data

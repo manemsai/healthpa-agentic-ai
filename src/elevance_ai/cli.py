@@ -27,7 +27,7 @@ def main() -> None:
 
     settings = get_settings()
     tool = PolicySearchTool.from_settings(settings)
-    decision = build_graph(tool).invoke(
+    decision = build_graph(tool, pricing_path=settings.pricing_data_path).invoke(
         args.question,
         market=args.market or settings.payer_market,
         line_of_business=args.line_of_business or settings.line_of_business,

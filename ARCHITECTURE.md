@@ -2,7 +2,7 @@
 
 ## Status
 
-HealthPA is an **end-to-end local/demo MVP** for evidence-first healthcare policy assistance. The primary runtime is implemented under `src/elevance_ai/` and is exercised through FastAPI, the CLI, tests, and a policy MCP server. It deliberately stops short of making member-specific approval, denial, benefit, or price determinations.
+HealthPA is an **end-to-end local/demo MVP** for evidence-first healthcare policy assistance. The primary runtime is implemented under `src/elevance_ai/` and is exercised through FastAPI, the CLI, tests, and policy, pricing, and CMS-scope MCP servers. It deliberately stops short of making member-specific approval, denial, benefit, or price determinations.
 
 A separate legacy/experimental CMS RAG + AWS Bedrock implementation remains under `src/graph/`, `src/rag/`, and `src/llm/` for research. It is not required by the primary MVP.
 
@@ -51,13 +51,13 @@ The primary `HealthPAGraph` routes questions into policy, member-coverage, provi
 The policy agent returns structured public-policy evidence. Evidence is guidance, not a final benefit or authorization determination.
 
 ### Coverage and cost boundaries
-Member-specific benefit/claim questions and unsupported negotiated-rate questions are escalated. The system does not fabricate eligibility, coverage, prices, or authorization outcomes when the required source system is unavailable.
+Member-specific benefit/claim questions are escalated. Provider-cost questions can use normalized public negotiated-rate observations when available; unsupported or member-specific cost questions are escalated. The system does not fabricate eligibility, coverage, prices, or authorization outcomes when the required source system is unavailable.
 
 ### Reviewer
 The reviewer detects final-decision language such as approval/denial claims and downgrades the response to human review with plan verification guidance.
 
 ### MCP
-`src/elevance_ai/mcp_servers/policy_server.py` exposes grounded policy search as an MCP tool over stdio. The API/CLI and MCP server share the same core retrieval implementation instead of duplicating business logic.
+The primary package exposes three stdio MCP surfaces: grounded policy search, normalized public pricing lookup, and CMS public-source scope guidance. These tools reuse the same domain/tool layer as the API and CLI rather than duplicating business logic.
 
 ### API
 FastAPI provides:
@@ -86,4 +86,4 @@ The legacy CMS/LangGraph/RAG code demonstrates richer LLM-oriented experimentati
 
 ## Production Extensions Not Claimed
 
-A production deployment would still require authenticated payer/member integrations, normalized pricing data, IAM and authorization, PHI/security controls, secret management, durable audit logs, production telemetry/tracing, SLOs, resilience controls, and infrastructure configured for a specific cloud runtime. Terraform and additional CMS/pricing/voice adapters should be completed only against real deployment requirements rather than mocked as production integrations.
+A production deployment would still require authenticated payer/member integrations, production-scale pricing ingestion/storage, IAM and authorization, PHI/security controls, secret management, durable audit logs, production telemetry/tracing, SLOs, resilience controls, and infrastructure configured for a specific cloud runtime. Terraform and additional CMS/pricing/voice adapters should be completed only against real deployment requirements rather than mocked as production integrations.
