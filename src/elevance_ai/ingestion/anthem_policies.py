@@ -8,6 +8,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from typing import Self
 from urllib.parse import urljoin, urlparse
 
 import httpx
@@ -55,7 +56,7 @@ class AnthemPolicyIngestionClient:
 
         self._client.close()
 
-    def __enter__(self) -> "AnthemPolicyIngestionClient":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *_args: object) -> None:

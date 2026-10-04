@@ -23,11 +23,6 @@ def rerank_results(
             ""
         ).lower()
 
-        text = result.get(
-            "text",
-            ""
-        ).lower()
-
         bonus = 0.0
 
         # Prefer exact disease/topic wording in title

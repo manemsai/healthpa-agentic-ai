@@ -17,7 +17,7 @@ class PolicySearchTool:
         self.retriever = retriever
 
     @classmethod
-    def from_settings(cls, settings: AppSettings | None = None) -> "PolicySearchTool":
+    def from_settings(cls, settings: AppSettings | None = None) -> PolicySearchTool:
         """Construct the tool from application settings."""
 
         app_settings = settings or get_settings()

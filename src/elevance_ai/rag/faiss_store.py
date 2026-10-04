@@ -46,7 +46,7 @@ class FaissPolicyIndex:
         metadata_file.write_text(json.dumps(self.metadata, ensure_ascii=True, indent=2), encoding="utf-8")
 
     @classmethod
-    def load(cls, index_path: str | Path, metadata_path: str | Path) -> "FaissPolicyIndex":
+    def load(cls, index_path: str | Path, metadata_path: str | Path) -> FaissPolicyIndex:
         """Load index vectors and metadata from disk."""
 
         index = faiss.read_index(str(index_path))

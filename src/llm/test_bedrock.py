@@ -1,6 +1,6 @@
-import boto3
 import json
 
+import boto3
 
 REGION = "us-east-1"
 MODEL_ID = "amazon.nova-lite-v1:0"

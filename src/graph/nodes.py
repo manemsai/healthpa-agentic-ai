@@ -1,13 +1,11 @@
 from __future__ import annotations
 
+from src.graph.state import HealthPAState
 from src.llm.bedrock_client import BedrockLLM
 from src.rag.confidence import calculate_retrieval_confidence
 from src.rag.grounding import calculate_grounding_score
 from src.rag.rag_pipeline import CMSRAGPipeline
 from src.rag.reranker import rerank_results
-
-from src.graph.state import HealthPAState
-
 
 rag_pipeline = CMSRAGPipeline()
 llm = BedrockLLM()
@@ -137,28 +135,6 @@ def evidence_check_node(
         "evidence_sufficient": True,
         "review_reason": "",
     }
-
-def human_review_node(
-    state: HealthPAState,
-) -> HealthPAState:
-
-    reason = state.get(
-        "review_reason"
-    ) or "Automated quality checks require verification."
-
-    print(f"[Human Review] {reason}")
-
-    return {
-        "answer": (
-            "I cannot determine coverage from the "
-            "available evidence. Additional policy "
-            "verification is required."
-        ),
-        "requires_human_review": True,
-        "review_reason": reason,
-        "final_status": "PENDING_HUMAN_REVIEW",
-    }
-
 
 def generation_node(
     state: HealthPAState,

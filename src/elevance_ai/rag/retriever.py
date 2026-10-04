@@ -29,7 +29,7 @@ class PolicyRetriever:
         index_path: str | Path,
         metadata_path: str | Path,
         embedding_dimensions: int = 256,
-    ) -> "PolicyRetriever":
+    ) -> PolicyRetriever:
         """Load a retriever from persisted local artifacts."""
 
         return cls(

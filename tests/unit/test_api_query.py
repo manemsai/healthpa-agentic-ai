@@ -1,11 +1,11 @@
 from datetime import date
 
+from apps.api.main import PolicyQueryRequest, PolicyQueryResponse
 from elevance_ai.domain.policy import PolicyChunk
 from elevance_ai.rag.embeddings import LocalHashEmbeddingModel
 from elevance_ai.rag.faiss_store import FaissPolicyIndex
 from elevance_ai.rag.retriever import PolicyRetriever
 from elevance_ai.tools.policy_tools import PolicySearchTool
-from apps.api.main import PolicyQueryRequest, PolicyQueryResponse
 
 
 def test_policy_query_response_contract() -> None:

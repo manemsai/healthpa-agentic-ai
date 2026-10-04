@@ -6,7 +6,6 @@ from src.llm.bedrock_client import BedrockLLM
 from src.rag.faiss_store import FAISSVectorStore
 from src.rag.reranker import rerank_results
 
-
 INDEX_FILE = Path(
     "data/vectorstore/faiss/ncd.index"
 )

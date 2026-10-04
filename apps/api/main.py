@@ -6,9 +6,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from elevance_ai import get_settings
-from elevance_ai.agents.policy_agent import PolicyAgent
-from elevance_ai.observability.logging import configure_logging
+from elevance_ai.agents.graph import build_graph
 from elevance_ai.domain.evidence import AssistantDecision, Evidence
+from elevance_ai.observability.logging import configure_logging
 from elevance_ai.tools.policy_tools import PolicySearchTool
 
 
@@ -64,7 +64,7 @@ def _load_policy_tool() -> None:
     global policy_tool
     try:
         policy_tool = PolicySearchTool.from_settings(settings)
-    except Exception:
+    except (OSError, RuntimeError, ValueError, ImportError):
         policy_tool = None
 
 
@@ -78,7 +78,7 @@ def query_policy(request: PolicyQueryRequest) -> PolicyQueryResponse:
         try:
             tool = PolicySearchTool.from_settings(settings)
             policy_tool = tool
-        except Exception:
+        except (OSError, RuntimeError, ValueError, ImportError):
             tool = None
     if tool is None:
         raise HTTPException(
@@ -91,14 +91,7 @@ def query_policy(request: PolicyQueryRequest) -> PolicyQueryResponse:
 
     market = request.market or settings.payer_market
     line_of_business = request.line_of_business or settings.line_of_business
-    evidence = tool.search(
-        request.question,
-        market=market,
-        line_of_business=line_of_business,
-        top_k=request.top_k,
-    )
-
-    decision = PolicyAgent(tool).answer(
+    decision = build_graph(tool).invoke(
         request.question,
         market=market,
         line_of_business=line_of_business,
