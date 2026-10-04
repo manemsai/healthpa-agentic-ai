@@ -9,6 +9,7 @@ from elevance_ai import get_settings
 from elevance_ai.agents.graph import build_graph
 from elevance_ai.domain.evidence import AssistantDecision, Evidence
 from elevance_ai.observability.logging import configure_logging
+from elevance_ai.observability.metrics import snapshot
 from elevance_ai.tools.policy_tools import PolicySearchTool
 
 
@@ -66,6 +67,12 @@ def _load_policy_tool() -> None:
         policy_tool = PolicySearchTool.from_settings(settings)
     except (OSError, RuntimeError, ValueError, ImportError):
         policy_tool = None
+
+
+@app.get("/metrics")
+def metrics() -> dict[str, int]:
+    """Return non-sensitive process-local aggregate counters."""
+    return snapshot()
 
 
 @app.post("/query", response_model=PolicyQueryResponse)
