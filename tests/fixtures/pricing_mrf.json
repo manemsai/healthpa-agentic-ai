@@ -1,0 +1,5 @@
+{
+  "last_updated_on": "2026-01-01",
+  "provider_references": [{"provider_group_id": 1, "provider_groups": [{"npi": [1234567890], "provider_name": "Example Clinic"}]}],
+  "in_network": [{"billing_code": "99213", "billing_code_type": "CPT", "description": "Office visit", "negotiated_rates": [{"provider_references": [1], "negotiated_prices": [{"negotiated_rate": 125.50, "negotiated_type": "negotiated"}]}]}]
+}
