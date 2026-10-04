@@ -16,4 +16,5 @@ class AgentState(TypedDict, total=False):
     route: RouteName
     retrieved_evidence: list[Evidence]
     warnings: list[str]
+    top_k: int
     draft_decision: AssistantDecision
