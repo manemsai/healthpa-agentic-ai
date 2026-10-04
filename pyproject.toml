@@ -1,7 +1,7 @@
 [project]
 name = "elevance-poc"
 version = "0.1.0"
-description = "Add your description here"
+description = "Healthcare policy retrieval and agentic AI proof of concept with FastAPI, FAISS, LangGraph, and AWS Bedrock"
 readme = "README.md"
 authors = [
     { name = "manemsai", email = "manemmohan.217@gmail.com" }
